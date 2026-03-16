@@ -1,5 +1,6 @@
 import 'package:BloomSpace/features/common/widgets/bloom_logo.dart';
 import 'package:BloomSpace/routes/app_routes.dart';
+import 'package:BloomSpace/services/app_error_mapper.dart';
 import 'package:BloomSpace/services/auth_service.dart';
 import 'package:flutter/material.dart';
 
@@ -67,7 +68,7 @@ class _SignupPageState extends State<SignupPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Signup failed: ${e.toString()}'),
+            content: Text('Signup failed: ${AppErrorMapper.toMessage(e)}'),
             backgroundColor: Colors.red,
           ),
         );

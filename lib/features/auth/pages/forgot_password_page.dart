@@ -1,4 +1,5 @@
 import 'package:BloomSpace/features/common/widgets/bloom_logo.dart';
+import 'package:BloomSpace/services/app_error_mapper.dart';
 import 'package:BloomSpace/services/auth_service.dart';
 import 'package:flutter/material.dart';
 
@@ -43,7 +44,9 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to send reset email: ${e.toString()}'),
+            content: Text(
+              'Failed to send reset email: ${AppErrorMapper.toMessage(e)}',
+            ),
             backgroundColor: Colors.red,
           ),
         );

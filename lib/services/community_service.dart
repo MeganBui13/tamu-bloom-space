@@ -74,17 +74,27 @@ class CommunityService {
       final userIds = posts.map((post) => post['user_id']).toSet().toList();
 
       if (userIds.isNotEmpty) {
-        final profilesResponse = await _supabase
-            .from('profiles')
-            .select('id, display_name')
-            .inFilter('id', userIds);
+        try {
+          final profilesResponse = await _supabase
+              .from('profiles')
+              .select('id, display_name')
+              .inFilter('id', userIds);
 
-        final profiles = { for (var profile in profilesResponse) profile['id'] : profile };
+          final profiles = {
+            for (var profile in profilesResponse) profile['id']: profile,
+          };
 
-        // Add profile data to posts
-        for (var post in posts) {
-          final profile = profiles[post['user_id']];
-          post['profiles'] = profile ?? {'display_name': 'Anonymous'};
+          // Add profile data to posts
+          for (var post in posts) {
+            final profile = profiles[post['user_id']];
+            post['profiles'] = profile ?? {'display_name': 'Anonymous'};
+          }
+        } catch (profileError) {
+          // Keep posts visible even if profile enrichment fails (RLS/network/etc.)
+          for (var post in posts) {
+            post['profiles'] = {'display_name': 'Anonymous'};
+          }
+          print('Profiles lookup failed in getPostsByChannel: $profileError');
         }
       }
 
@@ -330,7 +340,9 @@ class CommunityService {
             .select('id, display_name')
             .inFilter('id', userIds);
 
-        final profiles = { for (var profile in profilesResponse) profile['id'] : profile };
+        final profiles = {
+          for (var profile in profilesResponse) profile['id']: profile
+        };
 
         // Add profile data to comments
         for (var comment in comments) {

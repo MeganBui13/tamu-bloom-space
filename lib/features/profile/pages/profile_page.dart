@@ -1,5 +1,6 @@
 import 'package:BloomSpace/features/common/widgets/bloom_logo.dart';
 import 'package:BloomSpace/routes/app_routes.dart';
+import 'package:BloomSpace/services/app_error_mapper.dart';
 import 'package:BloomSpace/services/auth_service.dart';
 import 'package:flutter/material.dart';
 
@@ -79,7 +80,9 @@ class _ProfilePageState extends State<ProfilePage> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Error loading profile: ${e.toString()}'),
+              content: Text(
+                'Error loading profile: ${AppErrorMapper.toMessage(e)}',
+              ),
               backgroundColor: Colors.red,
             ),
           );
@@ -117,7 +120,9 @@ class _ProfilePageState extends State<ProfilePage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error saving profile: ${e.toString()}'),
+            content: Text(
+              'Error saving profile: ${AppErrorMapper.toMessage(e)}',
+            ),
             backgroundColor: Colors.red,
           ),
         );

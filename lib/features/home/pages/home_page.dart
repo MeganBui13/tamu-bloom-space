@@ -443,8 +443,8 @@ class HomePage extends StatelessWidget {
                               child: _buildFeatureCard(
                                 context,
                                 Icons.chat_bubble_outline,
-                                '1-on-1\nChat',
-                                'Connect with a peer\nlistener',
+                                'Journal\n& Chat',
+                                'What\'s on your mind?',
                                 '', // Route for 1-on-1 Chat
                               ),
                             ),

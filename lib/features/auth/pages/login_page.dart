@@ -1,5 +1,6 @@
 import 'package:BloomSpace/features/common/widgets/bloom_logo.dart';
 import 'package:BloomSpace/routes/app_routes.dart';
+import 'package:BloomSpace/services/app_error_mapper.dart';
 import 'package:BloomSpace/services/auth_service.dart';
 import 'package:flutter/material.dart';
 
@@ -49,7 +50,7 @@ class _LoginPageState extends State<LoginPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Login failed: ${e.toString()}'),
+            content: Text('Login failed: ${AppErrorMapper.toMessage(e)}'),
             backgroundColor: Colors.red,
           ),
         );

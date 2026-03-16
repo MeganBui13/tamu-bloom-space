@@ -1,5 +1,6 @@
 import 'package:BloomSpace/features/common/widgets/bloom_logo.dart';
 import 'package:BloomSpace/routes/app_routes.dart';
+import 'package:BloomSpace/services/app_error_mapper.dart';
 import 'package:BloomSpace/services/auth_service.dart';
 import 'package:BloomSpace/services/community_service.dart';
 import 'package:flutter/material.dart';
@@ -50,7 +51,8 @@ class _CommunityPageState extends State<CommunityPage> {
         setState(() => _isLoading = false);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error loading posts: ${e.toString()}'),
+            content:
+                Text('Error loading posts: ${AppErrorMapper.toMessage(e)}'),
             backgroundColor: Colors.red,
             duration: const Duration(seconds: 10),
           ),
@@ -147,7 +149,8 @@ class _CommunityPageState extends State<CommunityPage> {
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text('Error creating post: ${e.toString()}'),
+                      content: Text(
+                          'Error creating post: ${AppErrorMapper.toMessage(e)}'),
                       backgroundColor: Colors.red,
                     ),
                   );
@@ -557,7 +560,8 @@ class _CommunityPageState extends State<CommunityPage> {
                         if (mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content: Text('Error: ${e.toString()}'),
+                              content:
+                                  Text('Error: ${AppErrorMapper.toMessage(e)}'),
                               backgroundColor: Colors.red,
                             ),
                           );
@@ -593,7 +597,8 @@ class _CommunityPageState extends State<CommunityPage> {
                         if (mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content: Text('Error: ${e.toString()}'),
+                              content:
+                                  Text('Error: ${AppErrorMapper.toMessage(e)}'),
                               backgroundColor: Colors.red,
                             ),
                           );
@@ -776,7 +781,8 @@ class _CommunityPageState extends State<CommunityPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error deleting post: ${e.toString()}'),
+            content:
+                Text('Error deleting post: ${AppErrorMapper.toMessage(e)}'),
             backgroundColor: Colors.red,
           ),
         );
@@ -854,7 +860,8 @@ class _PostDetailPageState extends State<PostDetailPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error deleting post: ${e.toString()}'),
+            content:
+                Text('Error deleting post: ${AppErrorMapper.toMessage(e)}'),
             backgroundColor: Colors.red,
           ),
         );
@@ -883,7 +890,7 @@ class _PostDetailPageState extends State<PostDetailPage> {
         setState(() => _isLoading = false);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error loading post: ${e.toString()}'),
+            content: Text('Error loading post: ${AppErrorMapper.toMessage(e)}'),
             backgroundColor: Colors.red,
           ),
         );
@@ -914,7 +921,8 @@ class _PostDetailPageState extends State<PostDetailPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error posting comment: ${e.toString()}'),
+            content:
+                Text('Error posting comment: ${AppErrorMapper.toMessage(e)}'),
             backgroundColor: Colors.red,
           ),
         );
