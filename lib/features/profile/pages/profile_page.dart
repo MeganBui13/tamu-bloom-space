@@ -454,7 +454,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                     onChanged: (value) {
                                       setState(() => hideActivity = value);
                                     },
-                                    activeThumbColor: const Color(0xFF5A9B8A),
+                                    activeColor: const Color(0xFF5A9B8A),
                                   ),
                                 ],
                               ),
@@ -491,7 +491,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                     onChanged: (value) {
                                       setState(() => showOnlineStatus = value);
                                     },
-                                    activeThumbColor: const Color(0xFF5A9B8A),
+                                    activeColor: const Color(0xFF5A9B8A),
                                   ),
                                 ],
                               ),
