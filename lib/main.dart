@@ -19,8 +19,8 @@ Future<void> main() async {
     } else {
       try {
         await Supabase.initialize(
-          url: 'https://lhfxeywsdgwyfsbggirx.supabase.co',
-          anonKey: 'sb_publishable_Mi7AByWy0loX_wi6Fx08ow_VE4rE29t',
+          url: SupabaseConfig.url,
+          anonKey: SupabaseConfig.anonKey,
         );
       } catch (error) {
         startupError = AppErrorMapper.toMessage(
@@ -93,7 +93,8 @@ class StartupErrorPage extends StatelessWidget {
                 ),
                 const SizedBox(height: 20),
                 const SelectableText(
-                  'Run with valid credentials:\n'
+                  'On Vercel, set SUPABASE_URL and SUPABASE_ANON_KEY in Environment Variables and redeploy.\n\n'
+                  'For local runs:\n'
                   'flutter run --dart-define=SUPABASE_URL=https://<project-ref>.supabase.co '
                   '--dart-define=SUPABASE_ANON_KEY=<sb_publishable_or_anon_key>',
                   textAlign: TextAlign.center,

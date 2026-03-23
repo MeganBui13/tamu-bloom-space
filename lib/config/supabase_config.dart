@@ -3,9 +3,10 @@ import 'dart:async';
 import 'package:http/http.dart' as http;
 
 class SupabaseConfig {
-  static const String _defaultUrl = 'https://emmrljybzwllxoiatfiy.supabase.co';
+  static const String _deprecatedHost = 'emmrljybzwllxoiatfiy.supabase.co';
+  static const String _defaultUrl = 'https://lhfxeywsdgwyfsbggirx.supabase.co';
   static const String _defaultAnonKey =
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVtbXJsanliendsbHhvaWF0Zml5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM5ODc2NjgsImV4cCI6MjA3OTU2MzY2OH0.blUDDD1jRzsowcdaSX8dqLMu044vrwiZEY3yDxTS9J8';
+      'sb_publishable_Mi7AByWy0loX_wi6Fx08ow_VE4rE29t';
 
   static const String url = String.fromEnvironment(
     'SUPABASE_URL',
@@ -48,8 +49,8 @@ class SupabaseConfig {
       return 'Invalid SUPABASE_ANON_KEY. Use sb_publishable_... or legacy anon JWT.';
     }
 
-    if (parsedUrl.host == 'emmrljybzwllxoiatfiy.supabase.co') {
-      return 'Supabase host "emmrljybzwllxoiatfiy.supabase.co" does not resolve. '
+    if (parsedUrl.host == _deprecatedHost) {
+      return 'Supabase host "$_deprecatedHost" does not resolve. '
           'Use your active project URL in SUPABASE_URL.';
     }
 

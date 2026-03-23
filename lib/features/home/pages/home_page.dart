@@ -6,7 +6,7 @@ import 'dart:math' as math;
 import 'package:url_launcher/url_launcher.dart';
 
 class HomePage extends StatelessWidget {
-  const HomePage({Key? key}) : super(key: key);
+  const HomePage({super.key});
 
   void _navigateTo(BuildContext context, String routeName) async {
     if (routeName.startsWith('http://') || routeName.startsWith('https://')) {
@@ -49,10 +49,10 @@ class HomePage extends StatelessWidget {
                 Row(
                   children: const [
                     BloomLogo(),
-                    const SizedBox(width: 12),
+                    SizedBox(width: 12),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children: const [
+                      children: [
                         Text(
                           'Bloom Space',
                           style: TextStyle(
@@ -158,7 +158,7 @@ class HomePage extends StatelessWidget {
                                   child: Row(
                                     children: [
                                       // Flower pot illustration
-                                      Container(
+                                      SizedBox(
                                         width: 140,
                                         height: 160,
                                         child: CustomPaint(
