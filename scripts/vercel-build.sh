@@ -96,6 +96,8 @@ if [[ "$CURRENT_VERSION" != "$FLUTTER_VERSION" || ! -x "$SDK_DIR/bin/flutter" ]]
   mv "$SDK_ROOT/flutter" "$SDK_DIR"
 fi
 
+git config --global --add safe.directory "$SDK_DIR" >/dev/null 2>&1 || true
+
 export PATH="$SDK_DIR/bin:$PATH"
 export CI=true
 export FLUTTER_SUPPRESS_ANALYTICS=true
