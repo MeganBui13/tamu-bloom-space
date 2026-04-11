@@ -71,7 +71,12 @@ class CommunityService {
       final posts = List<Map<String, dynamic>>.from(postsResponse);
 
       // Fetch user profiles for all posts
-      final userIds = posts.map((post) => post['user_id']).toSet().toList();
+      final userIds = posts
+          .map((post) => post['user_id'])
+          .where((userId) => userId != null)
+          .cast<String>()
+          .toSet()
+          .toList();
 
       if (userIds.isNotEmpty) {
         try {
@@ -331,8 +336,12 @@ class CommunityService {
       final comments = List<Map<String, dynamic>>.from(commentsResponse);
 
       // Fetch user profiles for all comments
-      final userIds =
-          comments.map((comment) => comment['user_id']).toSet().toList();
+      final userIds = comments
+          .map((comment) => comment['user_id'])
+          .where((userId) => userId != null)
+          .cast<String>()
+          .toSet()
+          .toList();
 
       if (userIds.isNotEmpty) {
         final profilesResponse = await _supabase

@@ -519,8 +519,7 @@ class _CommunityPageState extends State<CommunityPage> {
 
     final String timeAgo = _getTimeAgo(createdAt);
 
-    // Note: comment count requires separate query, showing as 0 for now
-    const int commentCount = 0;
+    final int commentCount = post['comment_count'] ?? 0;
 
     return Card(
       margin: const EdgeInsets.only(bottom: 16),

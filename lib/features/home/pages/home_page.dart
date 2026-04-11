@@ -340,7 +340,7 @@ class HomePage extends StatelessWidget {
                                             width: double.infinity,
                                             child: ElevatedButton(
                                               onPressed: () =>
-                                                  _navigateTo(context, ''),
+                                                  _navigateTo(context, 'https://uhs.tamu.edu/mental-health/index.html#counseling'),
                                               style: ElevatedButton.styleFrom(
                                                 backgroundColor: const Color(
                                                   0xFF4A7C7C,
