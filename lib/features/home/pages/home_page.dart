@@ -6,6 +6,9 @@ import 'dart:math' as math;
 import 'package:url_launcher/url_launcher.dart';
 
 class HomePage extends StatelessWidget {
+  static const _counselingScheduleUrl =
+      'https://uhs.tamu.edu/mental-health/index.html#counseling';
+
   const HomePage({super.key});
 
   void _navigateTo(BuildContext context, String routeName) async {
@@ -13,16 +16,25 @@ class HomePage extends StatelessWidget {
       final Uri uri = Uri.parse(routeName);
 
       try {
-        if (await canLaunchUrl(uri)) {
-          await launchUrl(uri, mode: LaunchMode.externalApplication);
-        } else {
+        final launched = await launchUrl(
+          uri,
+          mode: LaunchMode.platformDefault,
+          webOnlyWindowName: '_blank',
+        );
+
+        if (!launched && context.mounted) {
           debugPrint('Could not launch $routeName');
           ScaffoldMessenger.of(
             context,
-          ).showSnackBar(SnackBar(content: Text('Could not open link')));
+          ).showSnackBar(const SnackBar(content: Text('Could not open link')));
         }
       } catch (e) {
         debugPrint('Error launching URL: $e');
+        if (context.mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(const SnackBar(content: Text('Could not open link')));
+        }
       }
       return;
     }
@@ -339,8 +351,10 @@ class HomePage extends StatelessWidget {
                                           SizedBox(
                                             width: double.infinity,
                                             child: ElevatedButton(
-                                              onPressed: () =>
-                                                  _navigateTo(context, 'https://uhs.tamu.edu/mental-health/index.html#counseling'),
+                                              onPressed: () => _navigateTo(
+                                                context,
+                                                _counselingScheduleUrl,
+                                              ),
                                               style: ElevatedButton.styleFrom(
                                                 backgroundColor: const Color(
                                                   0xFF4A7C7C,

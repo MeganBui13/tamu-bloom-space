@@ -1,7 +1,35 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class CounselingPage extends StatelessWidget {
+  static const _counselingScheduleUrl =
+      'https://uhs.tamu.edu/mental-health/index.html#counseling';
+
   const CounselingPage({super.key});
+
+  Future<void> _openCounselingSchedule(BuildContext context) async {
+    final uri = Uri.parse(_counselingScheduleUrl);
+
+    try {
+      final launched = await launchUrl(
+        uri,
+        mode: LaunchMode.platformDefault,
+        webOnlyWindowName: '_blank',
+      );
+
+      if (!launched && context.mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Could not open link')));
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Could not open link')));
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -40,14 +68,7 @@ class CounselingPage extends StatelessWidget {
             title: 'Book an appointment',
             subtitle: 'Schedule with Counseling & Psychological Services.',
             buttonLabel: 'Schedule',
-            onPressed: () {
-              // Replace with your scheduling route or deep link
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Hook up scheduling route here.'),
-                ),
-              );
-            },
+            onPressed: () => _openCounselingSchedule(context),
           ),
           const SizedBox(height: 16),
           _ActionCard(
