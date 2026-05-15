@@ -2,6 +2,7 @@ import 'package:BloomSpace/features/common/widgets/bloom_logo.dart';
 import 'package:BloomSpace/services/app_error_mapper.dart';
 import 'package:BloomSpace/services/auth_service.dart';
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ResetPasswordPage extends StatefulWidget {
   const ResetPasswordPage({super.key});
@@ -16,6 +17,42 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
   final _confirmPasswordController = TextEditingController();
   final _authService = AuthService();
   bool _isLoading = false;
+  bool _isReady = false;
+  String? _statusMessage;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeResetFlow();
+  }
+
+  Future<void> _initializeResetFlow() async {
+    final uri = Uri.base;
+    final queryError = uri.queryParameters['error'];
+    final queryErrorDescription = uri.queryParameters['error_description'];
+
+    if (queryError != null) {
+      setState(() {
+        _statusMessage = queryErrorDescription != null
+            ? Uri.decodeComponent(queryErrorDescription.replaceAll('+', ' '))
+            : 'Password reset link is invalid or has expired.';
+        _isReady = false;
+      });
+      return;
+    }
+
+    try {
+      await Supabase.instance.client.auth.getSessionFromUrl(uri);
+      setState(() {
+        _isReady = true;
+      });
+    } catch (error) {
+      setState(() {
+        _statusMessage = AppErrorMapper.toMessage(error);
+        _isReady = false;
+      });
+    }
+  }
 
   @override
   void dispose() {
@@ -31,7 +68,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(
-            'No active session found. Open the password reset email link and try again.',
+            'No active session found. Please request a new password reset email and try again.',
           ),
           backgroundColor: Colors.red,
         ),
@@ -69,6 +106,21 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
     }
   }
 
+  Widget _buildStatusMessage() {
+    if (_statusMessage == null) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 24),
+      child: Text(
+        _statusMessage!,
+        style: const TextStyle(
+          color: Colors.red,
+          fontWeight: FontWeight.w600,
+        ),
+        textAlign: TextAlign.center,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -88,56 +140,74 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 24),
-                Form(
-                  key: _formKey,
-                  child: Column(
+                _buildStatusMessage(),
+                if (!_isReady)
+                  Column(
                     children: [
-                      TextFormField(
-                        controller: _passwordController,
-                        decoration: const InputDecoration(
-                          labelText: 'New password',
-                          border: OutlineInputBorder(),
-                        ),
-                        obscureText: true,
-                        validator: (value) {
-                          if (value == null || value.trim().length < 6) {
-                            return 'Password must be at least 6 characters long';
-                          }
-                          return null;
-                        },
+                      const Text(
+                        'Password reset is unavailable. Please request a new reset email.',
+                        textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 16),
-                      TextFormField(
-                        controller: _confirmPasswordController,
-                        decoration: const InputDecoration(
-                          labelText: 'Confirm password',
-                          border: OutlineInputBorder(),
-                        ),
-                        obscureText: true,
-                        validator: (value) {
-                          if (value != _passwordController.text.trim()) {
-                            return 'Passwords do not match';
-                          }
-                          return null;
+                      ElevatedButton(
+                        onPressed: () {
+                          Navigator.of(context).pushReplacementNamed('/forgot-password');
                         },
-                      ),
-                      const SizedBox(height: 24),
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: _isLoading ? null : _handleUpdatePassword,
-                          child: _isLoading
-                              ? const SizedBox(
-                                  height: 20,
-                                  width: 20,
-                                  child: CircularProgressIndicator(strokeWidth: 2),
-                                )
-                              : const Text('Update Password'),
-                        ),
+                        child: const Text('Request new reset email'),
                       ),
                     ],
+                  )
+                else
+                  Form(
+                    key: _formKey,
+                    child: Column(
+                      children: [
+                        TextFormField(
+                          controller: _passwordController,
+                          decoration: const InputDecoration(
+                            labelText: 'New password',
+                            border: OutlineInputBorder(),
+                          ),
+                          obscureText: true,
+                          validator: (value) {
+                            if (value == null || value.trim().length < 6) {
+                              return 'Password must be at least 6 characters long';
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 16),
+                        TextFormField(
+                          controller: _confirmPasswordController,
+                          decoration: const InputDecoration(
+                            labelText: 'Confirm password',
+                            border: OutlineInputBorder(),
+                          ),
+                          obscureText: true,
+                          validator: (value) {
+                            if (value != _passwordController.text.trim()) {
+                              return 'Passwords do not match';
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 24),
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            onPressed: _isLoading ? null : _handleUpdatePassword,
+                            child: _isLoading
+                                ? const SizedBox(
+                                    height: 20,
+                                    width: 20,
+                                    child: CircularProgressIndicator(strokeWidth: 2),
+                                  )
+                                : const Text('Update Password'),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
               ],
             ),
           ),
