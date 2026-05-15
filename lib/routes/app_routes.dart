@@ -1,5 +1,6 @@
 import 'package:BloomSpace/features/auth/pages/forgot_password_page.dart';
 import 'package:BloomSpace/features/auth/pages/login_page.dart';
+import 'package:BloomSpace/features/auth/pages/reset_password_page.dart';
 import 'package:BloomSpace/features/auth/pages/signup_page.dart';
 import 'package:BloomSpace/features/profile/pages/profile_page.dart';
 import 'package:flutter/material.dart';
@@ -21,6 +22,7 @@ class AppRoutes {
   static const login = '/login';
   static const signup = '/signup';
   static const forgotPassword = '/forgot-password';
+  static const resetPassword = '/reset-password';
 
   static Map<String, WidgetBuilder> get routes => {
         home: (context) => const HomePage(),
@@ -33,5 +35,6 @@ class AppRoutes {
         login: (context) => const LoginPage(),
         signup: (context) => const SignupPage(),
         forgotPassword: (context) => const ForgotPasswordPage(),
+        resetPassword: (context) => const ResetPasswordPage(),
       };
 }

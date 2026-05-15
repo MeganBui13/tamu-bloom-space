@@ -71,7 +71,7 @@ class AuthService {
     try {
       await _supabase.auth.resetPasswordForEmail(
         email,
-        redirectTo: 'bloomspace://reset-password',
+        redirectTo: 'https://tamu-bloom-space.vercel.app/reset-password',
       );
     } catch (e) {
       rethrow;
