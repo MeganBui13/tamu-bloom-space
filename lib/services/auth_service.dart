@@ -25,25 +25,13 @@ class AuthService {
         data: {'display_name': displayName},
       );
 
-      final userId = response.user?.id ?? _supabase.auth.currentUser?.id;
-      if (userId != null) {
-        try {
-          await _supabase.from('profiles').insert({
-            'id': userId,
-            'display_name': displayName,
-            'email': email,
-            'created_at': DateTime.now().toIso8601String(),
-          });
-        } catch (error) {
-          if (error is PostgrestException &&
-              error.message.toLowerCase().contains('row-level security')) {
-            throw Exception(
-              'Signup succeeded but profile creation failed because Supabase row-level security blocked the insert. '
-              'Enable a profile INSERT policy that allows authenticated users to insert their own row with auth.uid() = id.',
-            );
-          }
-          rethrow;
-        }
+      final userId = response.user?.id;
+      if (userId != null && response.session != null) {
+        await _createProfileIfMissing(
+          userId: userId,
+          displayName: displayName,
+          email: email,
+        );
       }
 
       return response;
@@ -62,6 +50,8 @@ class AuthService {
         email: email,
         password: password,
       );
+
+      await _createProfileForAuthenticatedUser();
       return response;
     } catch (e) {
       rethrow;
@@ -113,6 +103,47 @@ class AuthService {
     } catch (e) {
       rethrow;
     }
+  }
+
+  Future<void> _createProfileIfMissing({
+    required String userId,
+    required String displayName,
+    required String email,
+  }) async {
+    final existingProfile = await getUserProfile(userId);
+    if (existingProfile != null) return;
+
+    try {
+      await _supabase.from('profiles').insert({
+        'id': userId,
+        'display_name': displayName,
+        'email': email,
+        'created_at': DateTime.now().toIso8601String(),
+      });
+    } catch (error) {
+      if (error is PostgrestException &&
+          error.message.toLowerCase().contains('row-level security')) {
+        throw Exception(
+          'Signup/login succeeded but profile creation failed because Supabase row-level security blocked the insert. '
+          'Enable a profile INSERT policy that allows authenticated users to insert their own row with auth.uid() = id.',
+        );
+      }
+      rethrow;
+    }
+  }
+
+  Future<void> _createProfileForAuthenticatedUser() async {
+    final user = _supabase.auth.currentUser;
+    if (user == null) return;
+
+    final displayName = user.userMetadata['display_name']?.toString() ?? user.email ?? '';
+    final email = user.email ?? '';
+
+    await _createProfileIfMissing(
+      userId: user.id,
+      displayName: displayName,
+      email: email,
+    );
   }
 
   // Update user profile
