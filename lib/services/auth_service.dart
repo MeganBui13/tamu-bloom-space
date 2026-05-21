@@ -136,7 +136,7 @@ class AuthService {
     final user = _supabase.auth.currentUser;
     if (user == null) return;
 
-    final displayName = user.userMetadata['display_name']?.toString() ?? user.email ?? '';
+    final displayName = user.userMetadata?['display_name']?.toString() ?? user.email ?? '';
     final email = user.email ?? '';
 
     await _createProfileIfMissing(
