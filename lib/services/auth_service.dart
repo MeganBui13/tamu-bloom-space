@@ -25,14 +25,25 @@ class AuthService {
         data: {'display_name': displayName},
       );
 
-      // Create profile in profiles table
-      if (response.user != null) {
-        await _supabase.from('profiles').insert({
-          'id': response.user!.id,
-          'display_name': displayName,
-          'email': email,
-          'created_at': DateTime.now().toIso8601String(),
-        });
+      final userId = response.user?.id ?? _supabase.auth.currentUser?.id;
+      if (userId != null) {
+        try {
+          await _supabase.from('profiles').insert({
+            'id': userId,
+            'display_name': displayName,
+            'email': email,
+            'created_at': DateTime.now().toIso8601String(),
+          });
+        } catch (error) {
+          if (error is PostgrestException &&
+              error.message.toLowerCase().contains('row-level security')) {
+            throw Exception(
+              'Signup succeeded but profile creation failed because Supabase row-level security blocked the insert. '
+              'Enable a profile INSERT policy that allows authenticated users to insert their own row with auth.uid() = id.',
+            );
+          }
+          rethrow;
+        }
       }
 
       return response;

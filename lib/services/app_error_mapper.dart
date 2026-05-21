@@ -31,6 +31,12 @@ class AppErrorMapper {
       return 'Invalid email or password.';
     }
 
+    if (normalized.contains('row-level security') ||
+        normalized.contains('new row violates row-level security policy')) {
+      return 'Signup failed because Supabase row-level security blocked profile creation. '
+          'In Supabase, add a policy on the profiles table allowing users to insert and update their own profile rows with auth.uid() = id.';
+    }
+
     return _clean(raw, fallback: fallback);
   }
 
