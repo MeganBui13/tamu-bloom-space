@@ -6,6 +6,10 @@
   "outputDirectory": "build/web",
   "rewrites": [
     {
+      "source": "/reset-password",
+      "destination": "/reset-password.html"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
