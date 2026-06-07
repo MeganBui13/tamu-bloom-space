@@ -42,9 +42,21 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
     }
 
     try {
-      await Supabase.instance.client.auth.getSessionFromUrl(uri);
+      final hasRecoveryParams =
+          uri.queryParameters.containsKey('access_token') ||
+          uri.queryParameters.containsKey('refresh_token') ||
+          uri.queryParameters['type'] == 'recovery' ||
+          uri.queryParameters.containsKey('code');
+
+      if (hasRecoveryParams) {
+        await Supabase.instance.client.auth.getSessionFromUrl(uri);
+      }
+
       setState(() {
-        _isReady = true;
+        _isReady = _authService.currentUser != null;
+        _statusMessage = _isReady
+            ? null
+            : 'Password reset link is invalid or has expired.';
       });
     } catch (error) {
       setState(() {
