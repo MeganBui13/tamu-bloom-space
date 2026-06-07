@@ -80,6 +80,22 @@ class _CommunityPageState extends State<CommunityPage> {
     }
   }
 
+  Future<void> _openPostDetail(String postId) async {
+    try {
+      await _communityService.incrementPostClickCount(postId);
+    } catch (e) {
+      debugPrint('Unable to increment post click count: $e');
+    }
+
+    if (!mounted) return;
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => PostDetailPage(postId: postId),
+      ),
+    );
+  }
+
   void _showCreatePostDialog() {
     final titleController = TextEditingController();
     final contentController = TextEditingController();
@@ -525,14 +541,7 @@ class _CommunityPageState extends State<CommunityPage> {
       margin: const EdgeInsets.only(bottom: 16),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: InkWell(
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => PostDetailPage(postId: postId),
-            ),
-          );
-        },
+        onTap: () => _openPostDetail(postId),
         borderRadius: BorderRadius.circular(12),
         child: Padding(
           padding: const EdgeInsets.all(16),

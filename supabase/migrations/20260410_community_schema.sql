@@ -42,6 +42,7 @@ create table public.community_posts (
     )
   ),
   upvotes integer not null default 0,
+  click_count integer not null default 0,
   comment_count integer not null default 0,
   created_at timestamptz not null default timezone('utc', now()),
   updated_at timestamptz not null default timezone('utc', now())
@@ -263,6 +264,19 @@ create trigger comments_sync_count
 after insert or update or delete on public.comments
 for each row
 execute function public.sync_post_comment_count();
+
+create or replace function public.increment_post_click_count(p_post_id uuid)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  update public.community_posts
+  set click_count = coalesce(click_count, 0) + 1
+  where id = p_post_id;
+end;
+$$;
 
 alter table public.profiles enable row level security;
 alter table public.community_posts enable row level security;

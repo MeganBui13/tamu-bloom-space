@@ -1,15 +1,32 @@
 import 'package:BloomSpace/features/common/widgets/bloom_logo.dart';
+import 'package:BloomSpace/features/community/pages/community_page.dart';
 import 'package:BloomSpace/routes/app_routes.dart';
+import 'package:BloomSpace/services/community_service.dart';
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 
 import 'package:url_launcher/url_launcher.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
+  const HomePage({super.key});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
   static const _counselingScheduleUrl =
       'https://uhs.tamu.edu/mental-health/index.html#counseling';
 
-  const HomePage({super.key});
+  final CommunityService _communityService = CommunityService();
+  List<Map<String, dynamic>> popularPosts = [];
+  bool _isLoadingPopularPosts = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadPopularPosts();
+  }
 
   void _navigateTo(BuildContext context, String routeName) async {
     if (routeName.startsWith('http://') || routeName.startsWith('https://')) {
@@ -42,6 +59,52 @@ class HomePage extends StatelessWidget {
     if (ModalRoute.of(context)?.settings.name != routeName) {
       debugPrint('Navigating to: $routeName');
       Navigator.pushNamed(context, routeName);
+    }
+  }
+
+  Future<void> _loadPopularPosts() async {
+    try {
+      final posts = await _communityService.getPopularPosts(limit: 3);
+      if (!mounted) return;
+      setState(() {
+        popularPosts = posts;
+        _isLoadingPopularPosts = false;
+      });
+    } catch (e) {
+      debugPrint('Error loading popular posts: $e');
+      if (!mounted) return;
+      setState(() {
+        popularPosts = [];
+        _isLoadingPopularPosts = false;
+      });
+    }
+  }
+
+  Future<void> _openPostDetail(String postId) async {
+    try {
+      await _communityService.incrementPostClickCount(postId);
+    } catch (e) {
+      debugPrint('Unable to increment post click count: $e');
+    }
+
+    if (!mounted) return;
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => PostDetailPage(postId: postId),
+      ),
+    );
+  }
+
+  String _formatPostTime(String createdAtStr) {
+    try {
+      final createdAt = DateTime.parse(createdAtStr.replaceAll('+00:00', 'Z').replaceAll('+00', 'Z'));
+      final difference = DateTime.now().toUtc().difference(createdAt.toUtc());
+      if (difference.inMinutes < 60) return '${difference.inMinutes}m ago';
+      if (difference.inHours < 24) return '${difference.inHours}h ago';
+      return '${difference.inDays}d ago';
+    } catch (_) {
+      return 'Just now';
     }
   }
 
@@ -505,44 +568,47 @@ class HomePage extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: 24),
-                        // Community post cards - CLICKABLE
-                        // TODO: Replace '' with your routes
-                        Row(
-                          children: [
-                            Expanded(
-                              child: _buildPostCard(
-                                context,
-                                'r/academic_stress',
-                                'Time Management Tips\nfor Busy Students',
-                                '3 h ago',
-                                '',
-                                '', // Route for this post
+                        if (_isLoadingPopularPosts)
+                          const Center(
+                            child: Padding(
+                              padding: EdgeInsets.symmetric(vertical: 24),
+                              child: CircularProgressIndicator(
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  Color(0xFF4A7C7C),
+                                ),
                               ),
                             ),
-                            const SizedBox(width: 24),
-                            Expanded(
-                              child: _buildPostCard(
-                                context,
-                                'r/selfcare',
-                                'Simple Self-Care Practices to Try',
-                                '1 day ago',
-                                '18 comments',
-                                '', // Route for this post
+                          )
+                        else if (popularPosts.isEmpty)
+                          const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 24),
+                            child: Text(
+                              'No popular community posts yet.',
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Color(0xFF1E3A3A),
                               ),
                             ),
-                            const SizedBox(width: 24),
-                            Expanded(
-                              child: _buildPostCard(
-                                context,
-                                'r/anxiety_support',
-                                'Coping with Exam Anxiety',
-                                '2 days ago',
-                                '30 comments',
-                                '', // Route for this post
-                              ),
-                            ),
-                          ],
-                        ),
+                          )
+                        else
+                          Row(
+                            children: [
+                              for (var post in popularPosts) ...[
+                                Expanded(
+                                  child: _buildPostCard(
+                                    context,
+                                    post['channel'] ?? 'Community',
+                                    post['title'] ?? 'Untitled Post',
+                                    _formatPostTime(post['created_at'] ?? ''),
+                                    '${post['comment_count'] ?? 0} comments',
+                                    () => _openPostDetail(post['id'] as String),
+                                  ),
+                                ),
+                                if (post != popularPosts.last)
+                                  const SizedBox(width: 24),
+                              ],
+                            ],
+                          ),
                       ],
                     ),
                   ),
@@ -638,10 +704,10 @@ class HomePage extends StatelessWidget {
     String title,
     String time,
     String comments,
-    String route,
+    VoidCallback onTap,
   ) {
     return InkWell(
-      onTap: () => _navigateTo(context, route),
+      onTap: onTap,
       child: Container(
         height: 180,
         padding: const EdgeInsets.all(24),

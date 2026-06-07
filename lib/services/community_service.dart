@@ -26,6 +26,7 @@ class CommunityService {
             'content': content,
             'channel': channel,
             'upvotes': 0,
+            'click_count': 0,
             // Store timestamps in UTC to avoid local offset issues (e.g., showing 6h ago)
             'created_at': DateTime.now().toUtc().toIso8601String(),
             'updated_at': DateTime.now().toUtc().toIso8601String(),
@@ -69,6 +70,10 @@ class CommunityService {
           .order(orderColumn, ascending: ascending);
 
       final posts = List<Map<String, dynamic>>.from(postsResponse);
+
+      if (sortBy == 'hot') {
+        posts.sort((a, b) => _calculatePopularity(b).compareTo(_calculatePopularity(a)));
+      }
 
       // Fetch user profiles for all posts
       final userIds = posts
@@ -137,7 +142,56 @@ class CommunityService {
           .order(orderColumn, ascending: ascending)
           .limit(limit);
 
-      return List<Map<String, dynamic>>.from(response);
+      final posts = List<Map<String, dynamic>>.from(response);
+      if (sortBy == 'hot') {
+        posts.sort((a, b) => _calculatePopularity(b).compareTo(_calculatePopularity(a)));
+      }
+
+      return posts;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> getPopularPosts({int limit = 3}) async {
+    try {
+      // Fetch recent posts and rank them by total engagement locally.
+      final response = await _supabase
+          .from('community_posts')
+          .select('id, title, channel, created_at, upvotes, click_count, comment_count, profiles(display_name)')
+          .order('created_at', ascending: false)
+          .limit(500);
+
+      final posts = List<Map<String, dynamic>>.from(response);
+      posts.sort((a, b) {
+        final popularityDifference = _calculatePopularity(b).compareTo(_calculatePopularity(a));
+        if (popularityDifference != 0) return popularityDifference;
+
+        // Tie-break on recency to keep the newest high-engagement posts first.
+        final createdA = DateTime.tryParse(a['created_at'] ?? '')?.toUtc();
+        final createdB = DateTime.tryParse(b['created_at'] ?? '')?.toUtc();
+        if (createdA == null || createdB == null) return 0;
+        return createdB.compareTo(createdA);
+      });
+      return posts.take(limit).toList();
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  int _calculatePopularity(Map<String, dynamic> post) {
+    final int upvotes = post['upvotes'] ?? 0;
+    final int commentCount = post['comment_count'] ?? 0;
+    final int clickCount = post['click_count'] ?? 0;
+    return upvotes + commentCount + clickCount;
+  }
+
+  // Increment view count for a post
+  Future<void> incrementPostClickCount(String postId) async {
+    try {
+      await _supabase.rpc('increment_post_click_count', params: {
+        'p_post_id': postId,
+      });
     } catch (e) {
       rethrow;
     }
